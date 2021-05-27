@@ -91,7 +91,6 @@ appsettings.json
 ```Json
  "liquid": {
     "messaging": {
-      //the name of this section must be de name of the cartridge ex.: kafka, azure, aws, etc
       "azure": {
         "TestAzureServiceBus": {
           "connectionString": ""
