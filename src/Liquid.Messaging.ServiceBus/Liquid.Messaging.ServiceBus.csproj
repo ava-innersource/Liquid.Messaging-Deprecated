@@ -2,9 +2,25 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>Liquid.Messaging.ServiceBus</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Avanade Brazil</Authors>
+    <Company>Avanade Inc.</Company>
+    <Product>Liquid - Modern Application Framework</Product>
+    <Copyright>Avanade 2019</Copyright>
+    <PackageProjectUrl>https://github.com/Avanade/Liquid.Messaging</PackageProjectUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <Version>2.0.0-preview-20210827-01</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>
+      The Liquid.Messaging.Azure provides producer and consumer patterns to allow the send and consumption of Messaging inside your microservice.
+      The main components are ILiquidProducer and ILiquidConsumer. This component allows send and consuming messages from Azure Service Bus.
+      This component is part of Liquid Application Framework.
+    </Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoFixture.Xunit2" Version="4.17.0" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.3" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>

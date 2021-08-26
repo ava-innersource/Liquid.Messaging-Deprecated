@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Liquid.Core.Exceptions;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using Liquid.Core.Exceptions;
 
 namespace Liquid.Messaging.Exceptions
 {
@@ -13,11 +13,13 @@ namespace Liquid.Messaging.Exceptions
     [ExcludeFromCodeCoverage]
     public class MessagingMissingConfigurationException : LiquidException
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessagingMissingConfigurationException"/> class.
-        /// </summary>
-        /// <param name="connectionId">The connection identifier.</param>
-        public MessagingMissingConfigurationException(string connectionId) : base($"The messaging configuration id {connectionId} does not exist. Please check your configuration file.")
+        ///<inheritdoc/>
+        public MessagingMissingConfigurationException(Exception innerException) : base("The messaging configuration is missing. See inner exception for more detail.", innerException)
+        {
+        }
+
+        ///<inheritdoc/>
+        public MessagingMissingConfigurationException(string message) : base(message)
         {
         }
 

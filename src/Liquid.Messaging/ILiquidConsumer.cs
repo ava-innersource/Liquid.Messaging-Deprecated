@@ -1,16 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Liquid.Messaging
 {
-    public interface ILiquidConsumer<TEvent>
+    /// <summary>
+    /// Handles message consuming process.
+    /// </summary>
+    /// <typeparam name="TEntity">Type of message body.</typeparam>
+    public interface ILiquidConsumer<TEntity>
     {
-        void Start();
+        /// <summary>
+        /// Initialize handler for consume <typeparamref name="TEntity"/> messages from topic or queue.
+        /// </summary>
+        void RegisterMessageHandler();
 
-        event Func<ProcessMessageEventArgs<TEvent>, CancellationToken, Task> ProcessMessageAsync;
+        /// <summary>
+        /// Defining the message processing function.
+        /// </summary>
+        event Func<ProcessMessageEventArgs<TEntity>, CancellationToken, Task> ProcessMessageAsync;
+
+        /// <summary>
+        /// Definition of the error handling process.
+        /// </summary>
         event Func<ProcessErrorEventArgs, Task> ProcessErrorAsync;
     }
 }
