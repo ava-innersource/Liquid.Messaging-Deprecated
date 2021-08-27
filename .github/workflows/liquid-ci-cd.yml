@@ -78,6 +78,7 @@ jobs:
         dotnet test test/Liquid.Messaging.Tests/*Tests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory $GITHUB_WORKSPACE/testresults
         reportgenerator -reports:$GITHUB_WORKSPACE/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/coverlet/reports -reporttypes:"SonarQube"
         dotnet sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
+
     - name: (CD) Nuget Pack & Push to Nuget.org
       if: ${{ github.event_name == 'push' }}
       run: |
