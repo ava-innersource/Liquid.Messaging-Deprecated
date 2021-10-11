@@ -1,4 +1,5 @@
 ﻿using Liquid.Messaging.Exceptions;
+using Liquid.Messaging.Interfaces;
 using Liquid.Messaging.ServiceBus.Tests.Mock;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Core;
@@ -25,7 +26,7 @@ namespace Liquid.Messaging.ServiceBus.Tests
 
             _serviceBusFactory.GetSender(Arg.Any<string>()).Returns(_client);
 
-            _sut = new ServiceBusProducer<EntityMock>(_serviceBusFactory);
+            _sut = new ServiceBusProducer<EntityMock>(_serviceBusFactory, "test");
 
             _message = new EntityMock() { Id = 1, MyProperty = "test" };
         }
