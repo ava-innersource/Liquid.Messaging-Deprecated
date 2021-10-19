@@ -27,7 +27,8 @@ This package contains the messaging subsystem of Liquid, for interacting with as
 Register a producer in service provider
 
 ```C#
-services.AddServiceBusProducer<MySampleMessage>("TestAzureServiceBus", "TestMessageTopic", false);
+//the value of the parameter must be the name of the appsettings section where the configuration of your producer is defined.
+services.AddServiceBusProducer<SampleMessageEntity>("Liquid:Messaging:ServiceBus:SampleProducer");
 ```
 
 Include dependency in domain class constructor, and invoke this send method
@@ -38,10 +39,10 @@ using Liquid.Messaging;
 ```C#
 public class MySampleProducer 
 {
-    //Dependency must be a ILightProducer implementation 
-    private ILightProducer<MySampleMessage> _producer;
+    //Dependency must be a ILiquidProducer implementation 
+    private ILiquidProducer<MySampleMessage> _producer;
 
-    public MySampleProducer(ILightProducer<MySampleMessage> producer)
+    public MySampleProducer(ILiquidProducer<MySampleMessage> producer)
     {
         _producer = producer;
     }
@@ -56,46 +57,42 @@ public class MySampleProducer
     }
 }
 ```
-### To consume messages, declare your subscriber :
-
+### To consume messages, implement LiquidWorker:
 ```C#
-public class MySampleConsumer : ServiceBusConsumer<MySampleMessage>
-{
-    public MySampleConsumer(IServiceProvider serviceProvider
-        , IMediator mediator
-        , IMapper mapper
-        , ILightContextFactory contextFactory
-        , ILightTelemetryFactory telemetryFactory
-        , ILoggerFactory loggerFactory
-        , ILightMessagingConfiguration<ServiceBusSettings> messagingConfiguration
-        , ServiceBusConsumerParameter serviceBusConsumerParameter) 
-        : base(serviceProvider, mediator, mapper, contextFactory, telemetryFactory, loggerFactory, messagingConfiguration, serviceBusConsumerParameter)
-    {
-    }
+ public class Worker : ILiquidWorker<SampleMessageEntity>
+    {;
+        private readonly IMediator _mediator;
 
-    //the consume async method is invoked when a message arrives
-    public override async Task<bool> ConsumeAsync(MySampleMessage message, IDictionary<string, object> headers, CancellationToken cancellationToken)
-    {
-        // Do what you need with the message, usually translate to a command and send it to the Mediator Service
+        public Worker(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+        //the ProcessMessageAsync method is invoked when a message arrives
+        public async Task ProcessMessageAsync(ProcessMessageEventArgs<SampleMessageEntity> args, CancellationToken cancellationToken)
+        {
+             // Do what you need with the message, usually translate to a command and send it to the Mediator Service
+            await _mediator.Send(new PutCommandRequest(args.Data));
+        }
     }
-}
 ```
-Dependency Injection
+### The dependency injection method register the LiquidBackgroundService{TMessage}, that is the Liquid implementation of IHostedService and work as the host of Consumer.
 ```C#
-//the value of the first parameter must be the name of the appsettings section where the connectionstring of this producer / consumer is defined.
-services.AddServiceBusProducer<MySampleMessage>("TestAzureServiceBus", "TestMessageTopic", false);
-
-services.AddServiceBusConsumer<MySampleConsumer, MySampleMessage>("TestAzureServiceBus", "TestMessageTopic", "TestMessageSubscription");
+//the value of the first parameter must be the name of the appsettings section where the configuration of your producer is defined, and second parameter is an array of assemblies where domain handlers are difined.
+services.AddLiquidServiceBusConsumer<Worker, SampleMessageEntity>("Liquid:Messaging:ServiceBus:SampleConsumer", typeof(PutCommandRequest).Assembly);
 ```
-appsettings.json
+### Configurations sample:
 ```Json
  "liquid": {
     "messaging": {
-      "azure": {
-        "TestAzureServiceBus": {
-          "connectionString": ""
+      "serviceBus": {
+        "sampleProducer": {
+          "ConnectionString": "",
+          "EntityPath": "sampleentity"
+        },
+        "sampleConsumer": {
+          "ConnectionString": "",
+          "EntityPath": "samplemessage"
         }
       }
-    }
   }
 ```
