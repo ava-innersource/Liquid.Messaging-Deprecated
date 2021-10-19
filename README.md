@@ -60,7 +60,7 @@ public class MySampleProducer
 ### To consume messages, implement LiquidWorker:
 ```C#
  public class Worker : ILiquidWorker<SampleMessageEntity>
-    {;
+    {
         private readonly IMediator _mediator;
 
         public Worker(IMediator mediator)
