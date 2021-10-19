@@ -1,44 +1,46 @@
 ﻿using Liquid.Core.Extensions.DependencyInjection;
 using Liquid.Messaging.Extensions.DependencyInjection;
 using Liquid.Messaging.Interfaces;
+using Liquid.Messaging.RabbitMq.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Liquid.Messaging.ServiceBus.Extensions.DependencyInjection
+namespace Liquid.Messaging.RabbitMq.Extensions.DependencyInjection
 {
     /// <summary>
     /// Startup extension methods. Used to configure the startup application.
     /// </summary>
-    [ExcludeFromCodeCoverage]
-    public static class IServiceCollectionExtensions
+    public static class IServiceCollectionExtension
     {
+
         /// <summary>
-        /// Register a <see cref="ServiceBusConsumer{TEntity}"/> with its dependency, and with 
-        /// <see cref="IServiceCollectionLiquidExtension.AddLiquidTelemetryInterceptor{TInterface, TService}(IServiceCollection)"/>.
+        /// Register a <see cref="RabbitMqConsumer{TEntity}"/> with its dependency, and with 
+        /// <see cref="IServiceCollectionLiquidExtension.AddScopedLiquidTelemetry{TInterface, TService}(IServiceCollection)"/>.
         /// </summary>
         /// <typeparam name="TEntity">Type of entity that will be consumed by this service instance.</typeparam>
         /// <param name="services">Extended service collection instance.</param>
         /// <param name="sectionName">Configuration section name.</param>
-        public static IServiceCollection AddServiceBusProducer<TEntity>(this IServiceCollection services, string sectionName)
+        public static IServiceCollection AddLiquidRabbitMqProducer<TEntity>(this IServiceCollection services, string sectionName)
         {
-            services.TryAddTransient<IServiceBusFactory, ServiceBusFactory>();
+            services.TryAddTransient<IRabbitMqFactory, RabbitMqFactory>();
 
             services.AddScoped((provider) =>
             {
-                return ActivatorUtilities.CreateInstance<ServiceBusProducer<TEntity>>(provider, sectionName);
+                var settings = provider.GetService<IConfiguration>().GetSection(sectionName).Get<RabbitMqProducerSettings>();
+                return ActivatorUtilities.CreateInstance<RabbitMqProducer<TEntity>>(provider, settings);
             });
 
-            services.AddScopedLiquidTelemetry<ILiquidProducer<TEntity>, ServiceBusProducer<TEntity>>();
+            services.AddScopedLiquidTelemetry<ILiquidProducer<TEntity>, RabbitMqProducer<TEntity>>();
 
             return services;
         }
 
         /// <summary>
         /// Register Liquid resources for consumers 
-        /// <see cref="Messaging.Extensions.DependencyInjection.IServiceCollectionExtensions.AddLiquidMessageConsumer{TService, TEntity}(IServiceCollection, Assembly[])"/>
-        /// and a <see cref="ServiceBusConsumer{TEntity}"/> service with its dependency, with 
+        /// <see cref="IServiceCollectionExtensions.AddLiquidMessageConsumer{TService, TEntity}(IServiceCollection, Assembly[])"/>
+        /// and a <see cref="RabbitMqConsumer{TEntity}"/> service with its dependency, with 
         /// <see cref="IServiceCollectionLiquidExtension.AddLiquidTelemetryInterceptor{TInterface, TService}(IServiceCollection)"/>.
         /// </summary>
         /// <typeparam name="TEntity">Type of entity that will be consumed by this service instance.</typeparam>
@@ -46,7 +48,7 @@ namespace Liquid.Messaging.ServiceBus.Extensions.DependencyInjection
         /// <param name="services">Extended service collection instance.</param>
         /// <param name="sectionName">Configuration section name.</param>
         /// <param name="assemblies">Array of assemblies that contains domain handlers implementation.</param>
-        public static IServiceCollection AddLiquidServiceBusConsumer<TWorker, TEntity>(this IServiceCollection services, string sectionName, params Assembly[] assemblies)
+        public static IServiceCollection AddLiquidRabbitMqConsumer<TWorker, TEntity>(this IServiceCollection services, string sectionName, params Assembly[] assemblies)
              where TWorker : class, ILiquidWorker<TEntity>
         {
             services.AddLiquidMessageConsumer<TWorker, TEntity>(assemblies);
@@ -57,7 +59,7 @@ namespace Liquid.Messaging.ServiceBus.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Register a <see cref="ServiceBusConsumer{TEntity}"/> service with its dependency, and with 
+        /// Register a <see cref="RabbitMqConsumer{TEntity}"/> service with its dependency, and with 
         /// <see cref="IServiceCollectionLiquidExtension.AddLiquidTelemetryInterceptor{TInterface, TService}(IServiceCollection)"/>.
         /// In order for consumers injected by this method to work correctly, you will need to register the Liquid settings
         /// <see cref="IServiceCollectionLiquidExtension.AddLiquidConfiguration(IServiceCollection)"/> and 
@@ -67,7 +69,7 @@ namespace Liquid.Messaging.ServiceBus.Extensions.DependencyInjection
         /// <typeparam name="TEntity">Type of entity that will be consumed by the service instance.</typeparam>
         /// <param name="services">Extended service collection instance.</param>
         /// <param name="sectionName">Configuration section name.</param>
-        public static IServiceCollection AddLiquidServiceBusConsumer<TWorker, TEntity>(this IServiceCollection services, string sectionName)
+        public static IServiceCollection AddLiquidRabbitMqConsumer<TWorker, TEntity>(this IServiceCollection services, string sectionName)
             where TWorker : class, ILiquidWorker<TEntity>
         {
             services.AddLiquidWorkerService<TWorker, TEntity>();
@@ -79,14 +81,15 @@ namespace Liquid.Messaging.ServiceBus.Extensions.DependencyInjection
 
         private static IServiceCollection AddConsumer<TEntity>(this IServiceCollection services, string sectionName)
         {
-            services.AddTransient<IServiceBusFactory, ServiceBusFactory>();
+            services.AddTransient<IRabbitMqFactory, RabbitMqFactory>();
 
             services.AddSingleton((provider) =>
             {
-                return ActivatorUtilities.CreateInstance<ServiceBusConsumer<TEntity>>(provider, sectionName);
+                var settings = provider.GetService<IConfiguration>().GetSection(sectionName).Get<RabbitMqProducerSettings>();
+                return ActivatorUtilities.CreateInstance<RabbitMqConsumer<TEntity>>(provider, settings);
             });
 
-            services.AddSingletonLiquidTelemetry<ILiquidConsumer<TEntity>, ServiceBusConsumer<TEntity>>();
+            services.AddSingletonLiquidTelemetry<ILiquidConsumer<TEntity>, RabbitMqConsumer<TEntity>>();
 
             return services;
         }
