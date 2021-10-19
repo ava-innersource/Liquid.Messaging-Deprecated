@@ -94,5 +94,6 @@ services.AddLiquidServiceBusConsumer<Worker, SampleMessageEntity>("Liquid:Messag
           "EntityPath": "samplemessage"
         }
       }
+    }
   }
 ```
