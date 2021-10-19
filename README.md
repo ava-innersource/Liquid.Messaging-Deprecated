@@ -77,7 +77,8 @@ public class MySampleProducer
 ```
 ### The dependency injection method register the LiquidBackgroundService{TMessage}, that is the Liquid implementation of IHostedService and work as the host of Consumer.
 ```C#
-//the value of the first parameter must be the name of the appsettings section where the configuration of your producer is defined, and second parameter is an array of assemblies where domain handlers are difined.
+//the value of the first parameter must be the name of the appsettings section where the configuration of your consumer
+//is defined, and second parameter is an array of assemblies where domain handlers are difined.
 services.AddLiquidServiceBusConsumer<Worker, SampleMessageEntity>("Liquid:Messaging:ServiceBus:SampleConsumer", typeof(PutCommandRequest).Assembly);
 ```
 ### Configurations sample:
